@@ -73,10 +73,10 @@ namespace test {
         }
 
         // Check if the inserted and searched values are the same
-        for (const auto& [id, p_simple] : simple_map) {
+        for (const auto& [_, p_simple] : simple_map) {
 
             // Search for the person in the database
-            auto it = person_search(id.c_str());
+            auto it = person_search(p_simple.id);
             assert(it != nullptr);
 
             const person& p_database = *it;
