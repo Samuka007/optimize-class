@@ -9,15 +9,6 @@
 
 个人信息系统对外提供两个功能函数，如程序示例1.11所示。其中 `person_insert()` 函数用于插入N条个人信息，内容存储在p指针指向的个人信息数据结构中； `person_search()` 用于查找字符串类型的id对应的个人信息，如果查找到，则返回对应的个人信息数据结构指针，否则返回NULL指针。
 
-需要测量两个时间。
-
-1. 连续插入$N$条记录所需要的时间$T$。
-2. 连续进行$M$次查找所需要的时间$T$。
-
-再由此计算出两个指标。
-1. 每秒钟插入的记录数 $B = N / T$（$N$的取值分别为$10^6$、$10^7$、$10^8$、$10^9$）。
-2. 每秒钟查找的记录数 $B = M / T$（$M$的取值为$10^6$）。
-
 C++STL的map方法可以建立（key，value）的映射关系，使用key快速查找到对应的value。以map方法为核心，采用下述不同的方案实现上述两个功能函数，并评估不同方案的性能提升，从而更加深刻地理解map方法的性能特征。
 
 实验所使用的软硬件平台参数如表1-6所示。
@@ -56,16 +47,63 @@ struct person *person_search(const char *id);
 > ▲ 程序示例1.11 实验题1.2的对外函数接口
 
 ## 实验方法
-实现以上四种方案，并对
+实现以上四种方案，并测量两个时间：
+
+1. 连续插入$N$条记录所需要的时间$T$。
+2. 连续进行$M$次查找所需要的时间$T$。
+
+再由此计算出两个指标。
+1. 每秒钟插入的记录数 $B = N / T$（$N$的取值分别为$10^6$、$10^7$、$10^8$、$10^9$）。
+2. 每秒钟查找的记录数 $B = M / T$（$M$的取值为$10^6$）。
+
+
 ## 实验结果分析
 上述三方面的参数各自有三种可能性，相互组合可以得到27种不同的测试案例。这些案例中qsort()函数升序排序时间如表1-7所示。
-表1-7 排序的性能评测（单位：ms）
+
+```
+Test for 10^6 records
+Insert time for version 1: 2502ms
+Search time for version 1: 2329ms
+Insert time for version 2: 3752ms
+Search time for version 2: 2264ms
+Insert time for version 3: 1728ms
+Search time for version 3: 1039ms
+Insert time for version 4: 1011ms
+Search time for version 4: 2704ms
+Test for 10^7 records
+Insert time for version 1: 36313ms
+Search time for version 1: 3278ms
+Insert time for version 2: 55478ms
+Search time for version 2: 3517ms
+Insert time for version 3: 25095ms
+Search time for version 3: 1535ms
+Insert time for version 4: 10743ms
+Search time for version 4: 2723ms
+Test for 10^8 records
+Skip version 1 for 10^8 records, reason: Time exceeds
+Skip version 2 for 10^8 records, reason: Time exceeds
+Insert time for version 3: 320971ms
+Search time for version 3: 2923ms
+Insert time for version 4: 127087ms
+Search time for version 4: 2875ms
+```
+
+|$M = 10^6$ |T1_N|T1_M|T2_N|T2_M|T3_N|T3_M|T4_N|T4_M|
+|---|---|---|---|---|---|---|---|---|
+| $N = 10^6$ |
+| $N = 10^7$ |
+| $N = 10^8$ |
+| $N = 10^9$ |
+> 表1-7 4种方案在不同$N$下的性能评测（单位：ms）
+
+|$M = 10^6$ |B1|B2|B3|B4|
+|---|---|---|---|---|
+| $N = 10^6$ |
+| $N = 10^7$ |
+| $N = 10^8$ |
+| $N = 10^9$ |
+> 表1-8 由此得到的4种表在4个数量级的$N$下的16个性能指标
 
 实验结果呈现以下特点。
-- 在相同数据类型和输入数据排列下，数据规模增至原来的10倍，排序时间一般随之变为11.5倍左右。
-- 在相同数据规模和输入数据排列下，数据类型的区别对性能的影响不大。
-- 在相同数据规模和数据类型下，输入数据排列对性能影响较大：完全随机的排序时间最长；倒序和近似顺序的时间比较接近，大约为完全随机排序时间的65%左右。
-之所以产生上述现象，主要是因为以下原因。
-- qsort()函数采用了快速排序方法，其计算复杂度为O（nlogn）。在n等于1M和10M时，10nlog（10n）/nlogn的值分别为11.6和11.4，这与上述第1个特点完全符合。
-- qsort()函数中，数据类型仅影响其比较过程，对其控制开销和数据搬移开销影响不大，所以数据类型的差异对性能影响不大。
-- qsort()函数内部可能会对不同排列类型的数据进行优化处理，使得对倒序排列和近似顺序排列的数据排序时有较高的性能。
+- 1
+- 2

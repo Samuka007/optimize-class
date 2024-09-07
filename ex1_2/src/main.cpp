@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <vector>
 #include <chrono>
 #include <cstring>
 #include <string>
@@ -132,25 +133,35 @@ namespace test {
 
 
 int main(int argc, char** argv) {
+    // using namespace std::chrono_literals;
     if (auto id = test::random_id(); id.length() != 18) {
         throw "random_id() should return a string with length 18";
     }
-    for (int i = 1; i <= 4; i++) {
-        set_version(i);
+    for (int n = 9; n < 10; n++) {
+        std::cout << "Test for 10^" << n << " records" << std::endl;
+        test::TestTime test_time(std::pow(10, n));
 
-        // test::test_accuracy(i);
-        test::TestTime test_time(1000000);
-        auto t = test::timer([&] {
-            test_time.insert();
-        });
-        auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t);
-        std::cout << "Insert time for version " << i << ": " 
-            << duration_ms << std::endl;
-        t = test::timer([&] {
-            test_time.search();
-        });
-        duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t);
-        std::cout << "Search time for version " << i << ": " 
-            << duration_ms << std::endl;
+        for (int i = 1; i <= 4; i++) {
+            if (n > 7 && i <= 3) {
+                std::cout << "Skip version " << i <<" for 10^" << n << " records" << std::endl;
+                continue;
+            }
+            set_version(i);
+            // test::test_accuracy(i);
+            auto t = test::timer([&] {
+                test_time.insert();
+            });
+            auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t);
+            std::cout << "Insert time for version " << i << ": " 
+                << duration_ms.count() << "ms" << std::endl;
+            t = test::timer([&] {
+                test_time.search();
+            });
+            duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t);
+            std::cout << "Search time for version " << i << ": " 
+                << duration_ms.count() << "ms" << std::endl;
+            clear();
+        }
     }
+    
 }

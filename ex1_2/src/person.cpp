@@ -7,6 +7,25 @@ void set_version(int v) {
     version = v;
 }
 
+void clear() {
+    switch (version) {
+        case 1:
+            v1::clear();
+            break;
+        case 2:
+            v2::clear();
+            break;
+        case 3:
+            v3::clear();
+            break;
+        case 4:
+            v4::clear();
+            break;
+        default:
+            throw "unsupported version";
+    }
+}
+
 person *person_search(const char *id) {
     switch (version) {
         case 1:

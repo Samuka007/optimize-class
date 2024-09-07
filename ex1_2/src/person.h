@@ -12,6 +12,7 @@ struct person {
 
 extern "C" {
     void set_version(int version);                 // 设置数据库版本
+    void clear();
     void person_insert(struct person *p, int N);   // 插入N条个人信息
     struct person *person_search(const char *id);  // 根据id查找个人信息
 }

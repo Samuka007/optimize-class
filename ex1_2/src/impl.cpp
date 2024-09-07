@@ -1,6 +1,7 @@
 #include "impl.hpp"
 #include <cmath>
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -105,25 +106,30 @@ std::tuple<int, int, int, std::uint32_t> v4_convert_id(std::string_view id) {
 
     std::uint32_t md_index {0};
 
-    return {year, month, day, converted_id};
+    return {year, month - 1, day - 1, converted_id};
 }
 
 void v4::person_database::insert(const std::span<person> persons) {
     for (const auto& p : persons) {
         auto [year, month, day, converted_id] = v4_convert_id(p.id);
 
-        auto map_position = this->index.find(year);
-        if (map_position == this->index.end()) {
-            auto [map_position, _] = this->index.insert({year, month_day_table()});
-            map_position->second.insert(month, day, converted_id, this->persons.size());
+        auto year_map = this->index.at(month).at(day);
+        auto target_map = year_map.find(year);
+        if (target_map == year_map.end()) {
+            // year doesn't exist
+            auto insert_index = this->persons.size();
+            year_map.emplace(year, std::map<index_t, std::uint32_t> {{converted_id, insert_index}});
             this->persons.push_back(p);
         } else {
-            auto result = map_position->second.search(month, day, converted_id);
-            if (result.has_value()) {
-                this->persons[result.value()] = p;
-            } else {
-                map_position->second.insert(month, day, converted_id, this->persons.size());
+            auto target_index = target_map->second.find(converted_id);
+            if (target_index == target_map->second.end()) {
+                // year exists, but the converted_id doesn't exist
+                auto insert_index = this->persons.size();
+                target_map->second.emplace(converted_id, insert_index);
                 this->persons.push_back(p);
+            } else {
+                // year and converted_id both exist
+                this->persons[target_index->second] = p;
             }
         }
     }
@@ -132,15 +138,10 @@ void v4::person_database::insert(const std::span<person> persons) {
 person& v4::person_database::search(std::string_view id) {
     auto [year, month, day, converted_id] = v4_convert_id(id);
 
-    auto map_position = this->index.find(year);
-    if (map_position == this->index.end()) {
-        throw "not found";
+    auto year_map = this->index.at(month).at(day);
+    auto target_map = year_map.find(year);
+    if (target_map == year_map.end()) {
+        throw std::runtime_error("ID not found");
     }
-
-    auto result = map_position->second.search(month, day, converted_id);
-    if (result.has_value()) {
-        return this->persons[result.value()];
-    } else {
-        throw "not found";
-    }
+    return this->persons[target_map->second.at(converted_id)];
 }

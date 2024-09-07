@@ -12,7 +12,6 @@ a simple thread-unsafe implementation of a person database
 #include <map>
 #include <vector>
 #include <span>
-#include <optional>
 
 namespace v1 {
     class person_database {
@@ -37,6 +36,9 @@ namespace v1 {
         } catch (...) {
             return nullptr;
         }
+    }
+    inline void clear() {
+        instance = person_database();
     }
 }
 
@@ -69,6 +71,9 @@ namespace v2 {
             return nullptr;
         }
     }
+    inline void clear() {
+        instance = person_database();
+    }
 }
 
 namespace v3 {
@@ -100,6 +105,9 @@ namespace v3 {
             return nullptr;
         }
     }
+    inline void clear() {
+        instance = person_database();
+    }
 }
 
 namespace v4 {
@@ -112,25 +120,12 @@ namespace v4 {
         void insert(std::span<person> persons);
         person& search(std::string_view id);
 
-        class month_day_table {
-            public:
-                void insert(std::uint32_t month, std::uint32_t day, std::uint32_t index, std::uint32_t pos) {
-                    this->index[month][day].insert_or_assign(index, pos);
-                }
-                std::optional<std::uint32_t> search(std::uint32_t month, std::uint32_t day, std::uint32_t index) {
-                    auto result = this->index[month][day].find(index);
-                    if (result == this->index[month][day].end()) {
-                        return std::nullopt;
-                    }
-                    return result->second;
-                }
-            private:
-                std::array<std::array<std::map<std::uint32_t,std::uint32_t>,31>,12> index;
-        };
     private:
         std::vector<person> persons;
-        // std::array<std::map<std::uint32_t, std::uint32_t>, 366> index;
-        std::map<std::uint16_t, month_day_table> index;
+        // std::map<std::uint16_t, month_day_table> index;
+        using year_t = std::uint32_t;
+        using index_t = std::uint32_t;
+        std::array<std::array<std::map<year_t, std::map<index_t, std::uint32_t>>, 31>, 12> index;
     };
 
     static person_database instance;
@@ -148,5 +143,9 @@ namespace v4 {
         } catch (...) {
             return nullptr;
         }
+    }
+
+    inline void clear() {
+        instance = person_database();
     }
 }
