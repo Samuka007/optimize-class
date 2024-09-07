@@ -115,8 +115,7 @@ namespace test {
             }
         }
 
-        void insert(int version) { // should only be called once for each version
-            set_version(version);
+        void insert() { // should only be called once for each version
             person_insert(persons.data(), persons.size());
         }
 
@@ -137,10 +136,12 @@ int main(int argc, char** argv) {
         throw "random_id() should return a string with length 18";
     }
     for (int i = 1; i <= 4; i++) {
+        set_version(i);
+
         // test::test_accuracy(i);
         test::TestTime test_time(1000000);
         auto t = test::timer([&] {
-            test_time.insert(i);
+            test_time.insert();
         });
         auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t);
         std::cout << "Insert time for version " << i << ": " 
