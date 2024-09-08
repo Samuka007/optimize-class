@@ -52,7 +52,7 @@ target("ex1_2")
 --    set_warnings("all", "error")
 --
 --    -- set language: c99, c++11
-   set_languages("c99", "c++20")
+   set_languages("c99", "c++23")
 --
 --    -- set optimization: none, faster, fastest, smallest
 --    set_optimize("fastest")

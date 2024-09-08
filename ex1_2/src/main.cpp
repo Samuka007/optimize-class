@@ -16,7 +16,7 @@ namespace test {
         auto header /* six num header */ = 100000 + rand() % 900000;
         auto tail = rand() % 1000;
         std::string res;
-        
+
         // header should be six digits
         res += std::to_string(header);
         res += std::to_string(year);
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
     if (auto id = test::random_id(); id.length() != 18) {
         throw "random_id() should return a string with length 18";
     }
-    for (int n = 9; n < 10; n++) {
+    for (int n = 6; n < 10; n++) {
         std::cout << "Test for 10^" << n << " records" << std::endl;
         test::TestTime test_time(std::pow(10, n));
 

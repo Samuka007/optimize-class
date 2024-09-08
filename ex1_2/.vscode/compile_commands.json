@@ -1,16 +1,16 @@
 [
 {
   "directory": "/home/samuka/workspace/optimize-class/ex1_2",
-  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-g", "-O0", "-std=c++20", "-o", "build/.objs/ex1_2/linux/x86_64/debug/src/person.cpp.o", "src/person.cpp"],
+  "arguments": ["/usr/bin/gcc-12", "-c", "-m64", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/linux/x86_64/debug/src/person.cpp.o", "src/person.cpp"],
   "file": "src/person.cpp"
 },
 {
   "directory": "/home/samuka/workspace/optimize-class/ex1_2",
-  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-g", "-O0", "-std=c++20", "-o", "build/.objs/ex1_2/linux/x86_64/debug/src/impl.cpp.o", "src/impl.cpp"],
+  "arguments": ["/usr/bin/gcc-12", "-c", "-m64", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/linux/x86_64/debug/src/impl.cpp.o", "src/impl.cpp"],
   "file": "src/impl.cpp"
 },
 {
   "directory": "/home/samuka/workspace/optimize-class/ex1_2",
-  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-g", "-O0", "-std=c++20", "-o", "build/.objs/ex1_2/linux/x86_64/debug/src/main.cpp.o", "src/main.cpp"],
+  "arguments": ["/usr/bin/gcc-12", "-c", "-m64", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/linux/x86_64/debug/src/main.cpp.o", "src/main.cpp"],
   "file": "src/main.cpp"
 }]
