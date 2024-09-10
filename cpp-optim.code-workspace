@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "ex1_2",
+			"path": "ex1_2"
+		},
+		{
+			"name": "ex2_1",
+			"path": "ex2_1"
+		},
+		{
+			"name": "ex2_4",
+			"path": "ex2_4"
+		}
+	],
+	"settings": {
+		"clangd.arguments": [
+			"--compile-commands-dir=.vscode"
+		]
+	}
+}

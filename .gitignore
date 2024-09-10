@@ -6,7 +6,7 @@ build/
 .DS_Store
 
 # vscode cache
-*/.cache/
+**/.cache/
 
 # vscode compile command cache
-**/.vscode/compile_commands.json
+**/compile_commands.json
