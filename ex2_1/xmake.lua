@@ -53,9 +53,10 @@ target("ex2_1")
 --
 --    -- set language: c99, c++11
    set_languages("c23", "c++23")
+   -- add_cxxflags("-funroll-loops")
 --
 --    -- set optimization: none, faster, fastest, smallest
---    set_optimize("fastest")
+   set_optimize("fastest")
 --
 --    -- add include search directories
 --    add_includedirs("/usr/include", "/usr/local/include")
