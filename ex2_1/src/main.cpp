@@ -27,7 +27,7 @@ constexpr void repeat(Callable&& func, Args&&...args) {
 constexpr unsigned N = 1000000000;
 constexpr double h = std::numbers::pi / 2.0 / N;
 
-constexpr double ex2_1_fx(double x)
+inline constexpr double ex2_1_fx(double x)
 {
     // $$f(x)=x(1-\frac{x^2}{3!}(1-\frac{x^2}{5!}(1-\frac{x^2}{7!})))$$
     double x2 = x*x;
@@ -76,12 +76,6 @@ double ex2_1_s_half_expand(double x)
         s3 += ex2_1_fx(k3++ * h) * h;
         s3 += ex2_1_fx(k3++ * h) * h;
         s3 += ex2_1_fx(k3++ * h) * h;
-        s3 += ex2_1_fx(k3++ * h) * h;
-        s3 += ex2_1_fx(k3++ * h) * h;
-        s3 += ex2_1_fx(k3++ * h) * h;
-        s3 += ex2_1_fx(k3++ * h) * h;
-        s3 += ex2_1_fx(k3++ * h) * h;
-        s3 += ex2_1_fx(k3++ * h) * h;
     }
     return s3;
 }
@@ -100,8 +94,8 @@ int main(int argc, char** argv) {
     auto [result, time] = timer_ms(ex2_1_s_for_only, 1);
     std::print("ex2_1_s_for_only(1) = {}, time = {}ms\n", result, time);
 
-    auto [result2, time2] = timer_ms(ex2_1_s_expand, 1);
-    std::print("ex2_1_s_expand(1) = {}, time = {}ms\n", result2, time2);
+    // auto [result2, time2] = timer_ms(ex2_1_s_expand, 1);
+    // std::print("ex2_1_s_expand(1) = {}, time = {}ms\n", result2, time2);
 
     auto [result3, time3] = timer_ms(ex2_1_s_half_expand, 1);
     std::print("ex2_1_s_half_expand(1) = {}, time = {}ms\n", result3, time3);

@@ -16,7 +16,14 @@ $$s=\int_0^{π/2}f(x)dx \approx {\sum}_{k=0}^{N-1}f(kh)h$$
 1. 将 $f(x)$ 展开得到
 $$f(x)=x(1-\frac{x^2}{3!}(1-\frac{x^2}{4\times5}(1-\frac{x^2}{6\times7})))$$
 
-2. 实现、展开与汇编可以参考：https://godbolt.org/z/rev3Mvfas
+2. 实现、展开与汇编可以参考：`https://godbolt.org/z/rev3Mvfas`
+
+| CPU |Apple M1| 架构 | arm64 |
+| --- | --- | --- | --- |
+| 主频 | 3.2/2.6 GHz | 核心数 | 8-core |
+| 操作系统 |macOS 15.0 Beta| 编译器 | Homebrew GCC 14.2.0 |
+| 三级缓存 | 8 MB | 内存速度 | 4266 MT/s |
+> 实验用软硬件平台参数
 
 ## 实验结果
 

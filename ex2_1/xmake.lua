@@ -53,6 +53,7 @@ target("ex2_1")
 --
 --    -- set language: c99, c++11
    set_languages("c23", "c++23")
+   add_cxflags("-march=native")
    -- add_cxxflags("-funroll-loops")
 --
 --    -- set optimization: none, faster, fastest, smallest
