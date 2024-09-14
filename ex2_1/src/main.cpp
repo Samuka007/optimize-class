@@ -1,6 +1,14 @@
 #include <functional>
-#include <print>
+// #include <print>
 #include <numbers>
+#include <chrono>
+// #include <format>
+#include <iostream>
+// using std::print;
+
+// void print(auto&&... args) {
+//     std::cout << std::format(std::forward<decltype(args)>(args)...);
+// }
 
 // 辅助类，用于递归展开函数调用
 template <unsigned N>
@@ -34,11 +42,11 @@ inline constexpr double ex2_1_fx(double x)
     return x * (1 - x2 / 6 * (1 - x2 / 20 * (1 - x2 / 42)));
 }
 
-double s1 = 0;
-unsigned k1 = 0;
 
 double ex2_1_s_for_only(double x)
 {
+    double s1 = 0;
+    unsigned k1 = 0;
     // $$s=\int_0^{π/2}f(x)dx \approx {\sum}_{k=0}^{N-1}f(kh)h$$
     // 其中 $h$ 和 $N$ 满足 $h {\times} N=\frac{\pi}{2}$
     for (; k1 < N; ++k1)
@@ -48,9 +56,9 @@ double ex2_1_s_for_only(double x)
     return s1;
 }
 
+
 double s2 = 0;
 unsigned k2 = 0;
-
 void recursive_help()
 {
     s2 += ex2_1_fx(k2 * h) * h;
@@ -65,23 +73,21 @@ double ex2_1_s_expand(double x)
     return s2;
 }
 
-double s3 = 0;
-unsigned k3 = 0;
 
 double ex2_1_s_half_expand(double x)
 {
+    double s3 = 0;
+    unsigned k3 = 0;
     while (k3 < N)
     {
-        s3 += ex2_1_fx(k3++ * h) * h;
-        s3 += ex2_1_fx(k3++ * h) * h;
-        s3 += ex2_1_fx(k3++ * h) * h;
-        s3 += ex2_1_fx(k3++ * h) * h;
+        s3 += ex2_1_fx(++k3 * h) * h;
+        s3 += ex2_1_fx(++k3 * h) * h;
+        s3 += ex2_1_fx(++k3 * h) * h;
+        s3 += ex2_1_fx(++k3 * h) * h;
     }
     return s3;
 }
 
-// time tester
-#include <chrono>
 auto timer_ms(auto&& func, auto&&... args)
 {
     auto start = std::chrono::high_resolution_clock::now();
@@ -92,11 +98,13 @@ auto timer_ms(auto&& func, auto&&... args)
 
 int main(int argc, char** argv) {
     auto [result, time] = timer_ms(ex2_1_s_for_only, 1);
-    std::print("ex2_1_s_for_only(1) = {}, time = {}ms\n", result, time);
+    // print("ex2_1_s_for_only(1) = {}, time = {}ms\n", result, time);
+    std::cout << "ex2_1_s_for_only(1) = " << result << ", time = " << time << "ms" << std::endl;
 
     // auto [result2, time2] = timer_ms(ex2_1_s_expand, 1);
     // std::print("ex2_1_s_expand(1) = {}, time = {}ms\n", result2, time2);
 
     auto [result3, time3] = timer_ms(ex2_1_s_half_expand, 1);
-    std::print("ex2_1_s_half_expand(1) = {}, time = {}ms\n", result3, time3);
+    // print("ex2_1_s_half_expand(1) = {}, time = {}ms\n", result3, time3);
+    std::cout << "ex2_1_s_half_expand(1) = " << result3 << ", time = " << time3 << "ms" << std::endl;
 }

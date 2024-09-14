@@ -1,16 +1,16 @@
 [
 {
-  "directory": "/Users/samuka_007/Workspace/optimize-class/ex1_2",
-  "arguments": ["/opt/homebrew/bin/gcc-14", "-c", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/macosx/arm64/debug/src/impl.cpp.o", "src/impl.cpp"],
-  "file": "src/impl.cpp"
-},
-{
-  "directory": "/Users/samuka_007/Workspace/optimize-class/ex1_2",
-  "arguments": ["/opt/homebrew/bin/gcc-14", "-c", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/macosx/arm64/debug/src/person.cpp.o", "src/person.cpp"],
+  "directory": "/home/samuka/workspace/optimize-class/ex1_2",
+  "arguments": ["/usr/bin/gcc-12", "-c", "-m64", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/linux/x86_64/debug/src/person.cpp.o", "src/person.cpp"],
   "file": "src/person.cpp"
 },
 {
-  "directory": "/Users/samuka_007/Workspace/optimize-class/ex1_2",
-  "arguments": ["/opt/homebrew/bin/gcc-14", "-c", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/macosx/arm64/debug/src/main.cpp.o", "src/main.cpp"],
+  "directory": "/home/samuka/workspace/optimize-class/ex1_2",
+  "arguments": ["/usr/bin/gcc-12", "-c", "-m64", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/linux/x86_64/debug/src/impl.cpp.o", "src/impl.cpp"],
+  "file": "src/impl.cpp"
+},
+{
+  "directory": "/home/samuka/workspace/optimize-class/ex1_2",
+  "arguments": ["/usr/bin/gcc-12", "-c", "-m64", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/linux/x86_64/debug/src/main.cpp.o", "src/main.cpp"],
   "file": "src/main.cpp"
 }]

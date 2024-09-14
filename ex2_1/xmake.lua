@@ -52,7 +52,7 @@ target("ex2_1")
 --    set_warnings("all", "error")
 --
 --    -- set language: c99, c++11
-   set_languages("c23", "c++23")
+   set_languages("c17", "c++20")
    add_cxflags("-march=native")
    -- add_cxxflags("-funroll-loops")
 --
