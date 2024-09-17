@@ -38,14 +38,13 @@ inline constexpr double ex2_1_fx(double x)
 #define VECTORIZE
 
 #ifdef FOR_ONLY
-double ex2_1_s_for_only(double x)
+double s1 = 0;
+void ex2_1_s_for_only()
 {
-    double s1 = 0;
     for (unsigned k1 = 0; k1 < N; ++k1)
     {
         s1 += ex2_1_fx(k1 * h) * h;
     }
-    return s1;
 }
 #endif
 
@@ -65,11 +64,9 @@ double ex2_1_s_for_only(double x)
 // }
 
 #ifdef EXPAND
-double ex2_1_s_half_expand(double x)
+double s3 = 0;
+void ex2_1_s_half_expand()
 {
-    double s3 = 0;
-    // #pragma loop(hint_parallel(8))
-    // #pragma loop(no_vector)
     for (unsigned k3 = 0; k3 < N; k3 += 4)
     {
         s3 += ex2_1_fx(k3 * h) * h;
@@ -77,7 +74,6 @@ double ex2_1_s_half_expand(double x)
         s3 += ex2_1_fx((k3+2) * h) * h;
         s3 += ex2_1_fx((k3+3) * h) * h;
     }
-    return s3;
 }
 #endif
 
@@ -86,7 +82,7 @@ double ex2_1_s_half_expand(double x)
 
 double vector_result {0.0};
 
-void ex2_1_s_vector(double x) {
+void ex2_1_s_vector() {
     // Assumes N is a multiple of 4 for simplicity
     size_t i;
     // double vector_result = 0.0;
@@ -124,7 +120,7 @@ void ex2_1_s_vector(double x) {
 #endif
 
 #ifdef T_INLINE
-double ex2_1_s_inline(double x)
+double ex2_1_s_inline()
 {
     double s1 = 0;
     for (unsigned k1 = 0; k1 < N; ++k1)
@@ -139,28 +135,28 @@ double ex2_1_s_inline(double x)
 
 int main(int argc, char** argv) {
     #ifdef FOR_ONLY
-    auto [result, time] = timer_ms_with_return(ex2_1_s_for_only, 1);
+    auto time = timer_ms(ex2_1_s_for_only);
     // std::print("ex2_1_s_for_only(1) = {}, time = {}ms\n", result, time);
-    std::cout << "ex2_1_s_for_only(1) = " << result << ", time = " << time << "ms" << std::endl;
+    std::cout << "ex2_1_s_for_only(1) = " << s1 << ", time = " << time << "ms" << std::endl;
     #endif
 
     // auto [result2, time2] = timer_ms(ex2_1_s_expand, 1);
     // std::print("ex2_1_s_expand(1) = {}, time = {}ms\n", result2, time2);
 
     #ifdef EXPAND
-    auto [result3, time3] = timer_ms_with_return(ex2_1_s_half_expand, 1);
+    auto time3 = timer_ms(ex2_1_s_half_expand);
     // std::print("ex2_1_s_half_expand(1) = {}, time = {}ms\n", result3, time3);
-    std::cout << "ex2_1_s_half_expand(1) = " << result3 << ", time = " << time3 << "ms" << std::endl;
+    std::cout << "ex2_1_s_half_expand(1) = " << s3 << ", time = " << time3 << "ms" << std::endl;
     #endif
 
     #ifdef T_INLINE
-    auto [result4, time4] = timer_ms_with_return(ex2_1_s_inline, 1);
+    auto [result4, time4] = timer_ms_with_return(ex2_1_s_inline);
     // std::print("ex2_1_s_inline(1) = {}, time = {}ms\n", result4, time4);
     std::cout << "ex2_1_s_inline(1) = " << result4 << ", time = " << time4 << "ms" << std::endl;
     #endif
 
     #ifdef VECTORIZE
-    auto time5 = timer_ms(ex2_1_s_vector, 1);
+    auto time5 = timer_ms(ex2_1_s_vector);
     // std::print("ex2_1_s_vector(1) = {}, time = {}ms\n", result5, time5);
     std::cout << "ex2_1_s_vector(1) = " << vector_result << ", time = " << time5 << "ms" << std::endl;
     #endif
