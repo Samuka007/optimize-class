@@ -120,16 +120,15 @@ void ex2_1_s_vector() {
 #endif
 
 #ifdef T_INLINE
-double ex2_1_s_inline()
+double s4 = 0;
+void ex2_1_s_inline()
 {
-    double s1 = 0;
     for (unsigned k1 = 0; k1 < N; ++k1)
     {
         double pa1 = k1 * h;
         double pa12 = pa1 * pa1;
-        s1 += pa1 * (1 - pa12 * par1 * (1 - pa12 * par2 * (1 - pa12 * par3))) * h;
+        s4 += pa1 * (1 - pa12 * par1 * (1 - pa12 * par2 * (1 - pa12 * par3))) * h;
     }
-    return s1;
 }
 #endif
 
@@ -150,9 +149,9 @@ int main(int argc, char** argv) {
     #endif
 
     #ifdef T_INLINE
-    auto [result4, time4] = timer_ms_with_return(ex2_1_s_inline);
+    auto time4 = timer_ms(ex2_1_s_inline);
     // std::print("ex2_1_s_inline(1) = {}, time = {}ms\n", result4, time4);
-    std::cout << "ex2_1_s_inline(1) = " << result4 << ", time = " << time4 << "ms" << std::endl;
+    std::cout << "ex2_1_s_inline(1) = " << s4 << ", time = " << time4 << "ms" << std::endl;
     #endif
 
     #ifdef VECTORIZE

@@ -60,27 +60,27 @@ PS C:\Users\Administrator\workspace\optimize-class\ex2_1> xmake -rv
 [ 50%]: cache compiling.release src\main.cpp
 gcc -c -m64 -fvisibility=hidden -fvisibility-inlines-hidden -O3 -std=c++23 -march=native -fopt-info-vec-missed -fopt-info-vec -DNDEBUG -o build\.objs\ex2_1\mingw\x86_64\release\src\main.cpp.obj src\main.cpp
 src\main.cpp:44:30: missed: couldn't vectorize loop
-src\main.cpp:41:8: missed: not vectorized: unsupported data-type double
-src\main.cpp:73:30: missed: couldn't vectorize loop
-src\main.cpp:68:8: missed: not vectorized: unsupported data-type double
-src\main.cpp:130:30: missed: couldn't vectorize loop
-src\main.cpp:127:8: missed: not vectorized: unsupported data-type double
+src\main.cpp:42:6: missed: not vectorized: unsupported data-type double
+src\main.cpp:70:30: missed: couldn't vectorize loop
+src\main.cpp:68:6: missed: not vectorized: unsupported data-type double
+src\main.cpp:111:23: optimized: loop vectorized using 32 byte vectors
+src\main.cpp:94:19: missed: couldn't vectorize loop
+src\main.cpp:85:6: missed: not vectorized: unsupported data-type size_t
+C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/avxintrin.h:1260:54: optimized: basic block part vectorized using 32 byte vectors
+src\main.cpp:126:30: missed: couldn't vectorize loop
+src\main.cpp:124:6: missed: not vectorized: unsupported data-type double
 C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/c++/bits/locale_facets.h:884:21: missed: statement clobbers memory: std::ctype<char>::_M_widen_init (_14);
 C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/c++/bits/locale_facets.h:885:23: missed: statement clobbers memory: _27 = OBJ_TYPE_REF(_25;_14->6B) (_14, 10);
 C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/c++/ostream:742:28: missed: statement clobbers memory: _8 = std::basic_ostream<char>::put (__os_1(D), _7);
 C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/c++/ostream:764:24: missed: statement clobbers memory: std::basic_ostream<char>::flush (_8);
 C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/c++/bits/basic_ios.h:50:18: missed: statement clobbers memory: std::__throw_bad_cast ();
-src\main.cpp:115:23: optimized: loop vectorized using 32 byte vectors
-src\main.cpp:98:19: missed: couldn't vectorize loop
-src\main.cpp:89:6: missed: not vectorized: unsupported data-type size_t
-C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/avxintrin.h:1260:54: optimized: basic block part vectorized using 32 byte vectors
-src\main.cpp:9:57: missed: statement clobbers memory: start = std::chrono::_V2::system_clock::now ();
+src\main.cpp:16:57: missed: statement clobbers memory: start = std::chrono::_V2::system_clock::now ();
 [ 75%]: linking.release ex2_1.exe
 g++ -o build\mingw\x86_64\release\ex2_1.exe build\.objs\ex2_1\mingw\x86_64\release\src\main.cpp.obj -m64 -s
-[100%]: build ok, spent 0.578s
+[100%]: build ok, spent 2.734s
 PS C:\Users\Administrator\workspace\optimize-class\ex2_1> xmake run
-ex2_1_s_for_only(1) = 0.999975, time = 1140ms
-ex2_1_s_half_expand(1) = 0.999975, time = 1082ms
-ex2_1_s_inline(1) = 0.999975, time = 1091ms
-ex2_1_s_vector(1) = 0.999975, time = 466ms
+ex2_1_s_for_only(1) = 0.999975, time = 1138ms
+ex2_1_s_half_expand(1) = 0.999975, time = 1085ms
+ex2_1_s_inline(1) = 0.999975, time = 1085ms
+ex2_1_s_vector(1) = 0.999975, time = 472ms
 ```
