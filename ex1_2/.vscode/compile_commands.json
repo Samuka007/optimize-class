@@ -1,16 +1,16 @@
 [
 {
-  "directory": "/Users/samuka_007/Workspace/optimize-class/ex1_2",
-  "arguments": ["/opt/homebrew/bin/gcc-14", "-c", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/macosx/arm64/debug/src/impl.cpp.o", "src/impl.cpp"],
-  "file": "src/impl.cpp"
+  "directory": "c:\\Users\\Administrator\\workspace\\optimize-class\\ex1_2",
+  "arguments": ["gcc.exe", "-c", "-m64", "-g", "-O0", "-std=c++23", "-fexceptions", "-o", "build\\.objs\\ex1_2\\windows\\x64\\debug\\src\\impl.cpp.obj", "src\\impl.cpp"],
+  "file": "src\\impl.cpp"
 },
 {
-  "directory": "/Users/samuka_007/Workspace/optimize-class/ex1_2",
-  "arguments": ["/opt/homebrew/bin/gcc-14", "-c", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/macosx/arm64/debug/src/person.cpp.o", "src/person.cpp"],
-  "file": "src/person.cpp"
+  "directory": "c:\\Users\\Administrator\\workspace\\optimize-class\\ex1_2",
+  "arguments": ["gcc.exe", "-c", "-m64", "-g", "-O0", "-std=c++23", "-fexceptions", "-o", "build\\.objs\\ex1_2\\windows\\x64\\debug\\src\\main.cpp.obj", "src\\main.cpp"],
+  "file": "src\\main.cpp"
 },
 {
-  "directory": "/Users/samuka_007/Workspace/optimize-class/ex1_2",
-  "arguments": ["/opt/homebrew/bin/gcc-14", "-c", "-g", "-O0", "-std=c++23", "-o", "build/.objs/ex1_2/macosx/arm64/debug/src/main.cpp.o", "src/main.cpp"],
-  "file": "src/main.cpp"
+  "directory": "c:\\Users\\Administrator\\workspace\\optimize-class\\ex1_2",
+  "arguments": ["gcc.exe", "-c", "-m64", "-g", "-O0", "-std=c++23", "-fexceptions", "-o", "build\\.objs\\ex1_2\\windows\\x64\\debug\\src\\person.cpp.obj", "src\\person.cpp"],
+  "file": "src\\person.cpp"
 }]

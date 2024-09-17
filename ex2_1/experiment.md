@@ -18,12 +18,12 @@ $$f(x)=x(1-\frac{x^2}{3!}(1-\frac{x^2}{4\times5}(1-\frac{x^2}{6\times7})))$$
 
 2. 实现、展开与汇编可以参考：`https://godbolt.org/z/rev3Mvfas`
 
-| CPU |Apple M1| 架构 | arm64 |
+<!-- | CPU |Apple M1| 架构 | arm64 |
 | --- | --- | --- | --- |
 | 主频 | 3.2/2.6 GHz | 核心数 | 8-core |
 | 操作系统 |macOS 15.0 Beta| 编译器 | Homebrew GCC 14.2.0 |
 | 三级缓存 | 8 MB | 内存速度 | 4266 MT/s |
-> 实验用软硬件平台参数
+> 实验用软硬件平台参数 -->
 
 ## 实验结果
 
@@ -54,46 +54,33 @@ half unroll | 2371
 1. 在任何情况下，在遇到了 $N = 10^9$ 的量级的循环时，完全循环展开的方法并没有带来性能提升，反而时间开销与空间开销剧增。说明，完全展开在遇到大量循环时，并不是一个好的优化方法。猜测是因为完全展开后，代码量过大，导致了缓存未命中，反而增加了时间开销。
 2. 在 O0 与 O1 -funroll-loops 优化的情况下，半展开的方法都有着5%～54%的性能提升，说明在无优化与轻度优化的情况下，半展开能起到一定的优化效果。
 3. 在 O3 release 优化的情况下，两种手动优化的方法都成了小丑，时间开销都大于未优化的方法，编译器对于finite loop的优化效果是非常好的，手动优化反而会带来性能下降。
-4. 通过研究产生的汇编，可以发现编译器在 O3 release 优化的情况下，将整个ex_1_2_for_only函数所用到的寄存器压缩到了10个，而手动优化破坏了编译器的优化，反而导致了寄存器开销的增多与缓存的未命中，时间开销增加。
-```asm
-ex2_1_s_for_only(double):
-        mov     eax, DWORD PTR k1[rip]
-        movsd   xmm5, QWORD PTR s1[rip]
-        cmp     eax, 999999999
-        ja      .L1
-        movsd   xmm6, QWORD PTR .LC0[rip]
-        movsd   xmm9, QWORD PTR .LC1[rip]
-        movsd   xmm4, QWORD PTR .LC2[rip]
-        movsd   xmm7, QWORD PTR .LC4[rip]
-        movsd   xmm8, QWORD PTR .LC3[rip]
-.L3:
-        pxor    xmm1, xmm1
-        movapd  xmm3, xmm4
-        cvtsi2sd        xmm1, eax
-        add     eax, 1
-        mulsd   xmm1, xmm6
-        movapd  xmm0, xmm1
-        mulsd   xmm0, xmm1
-        movapd  xmm2, xmm0
-        divsd   xmm2, xmm9
-        subsd   xmm3, xmm2
-        movapd  xmm2, xmm0
-        divsd   xmm2, xmm8
-        divsd   xmm0, xmm7
-        mulsd   xmm3, xmm2
-        movapd  xmm2, xmm4
-        subsd   xmm2, xmm3
-        mulsd   xmm2, xmm0
-        movapd  xmm0, xmm4
-        subsd   xmm0, xmm2
-        mulsd   xmm0, xmm1
-        mulsd   xmm0, xmm6
-        addsd   xmm5, xmm0
-        cmp     eax, 1000000000
-        jne     .L3
-        mov     DWORD PTR k1[rip], 1000000000
-        movsd   QWORD PTR s1[rip], xmm5
-.L1:
-        movapd  xmm0, xmm5
-        ret
+
+```output
+PS C:\Users\Administrator\workspace\optimize-class\ex2_1> xmake -rv
+[ 50%]: cache compiling.release src\main.cpp
+gcc -c -m64 -fvisibility=hidden -fvisibility-inlines-hidden -O3 -std=c++23 -march=native -fopt-info-vec-missed -fopt-info-vec -DNDEBUG -o build\.objs\ex2_1\mingw\x86_64\release\src\main.cpp.obj src\main.cpp
+src\main.cpp:44:30: missed: couldn't vectorize loop
+src\main.cpp:41:8: missed: not vectorized: unsupported data-type double
+src\main.cpp:73:30: missed: couldn't vectorize loop
+src\main.cpp:68:8: missed: not vectorized: unsupported data-type double
+src\main.cpp:130:30: missed: couldn't vectorize loop
+src\main.cpp:127:8: missed: not vectorized: unsupported data-type double
+C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/c++/bits/locale_facets.h:884:21: missed: statement clobbers memory: std::ctype<char>::_M_widen_init (_14);
+C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/c++/bits/locale_facets.h:885:23: missed: statement clobbers memory: _27 = OBJ_TYPE_REF(_25;_14->6B) (_14, 10);
+C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/c++/ostream:742:28: missed: statement clobbers memory: _8 = std::basic_ostream<char>::put (__os_1(D), _7);
+C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/c++/ostream:764:24: missed: statement clobbers memory: std::basic_ostream<char>::flush (_8);
+C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/c++/bits/basic_ios.h:50:18: missed: statement clobbers memory: std::__throw_bad_cast ();
+src\main.cpp:115:23: optimized: loop vectorized using 32 byte vectors
+src\main.cpp:98:19: missed: couldn't vectorize loop
+src\main.cpp:89:6: missed: not vectorized: unsupported data-type size_t
+C:/w64devkit/lib/gcc/x86_64-w64-mingw32/14.1.0/include/avxintrin.h:1260:54: optimized: basic block part vectorized using 32 byte vectors
+src\main.cpp:9:57: missed: statement clobbers memory: start = std::chrono::_V2::system_clock::now ();
+[ 75%]: linking.release ex2_1.exe
+g++ -o build\mingw\x86_64\release\ex2_1.exe build\.objs\ex2_1\mingw\x86_64\release\src\main.cpp.obj -m64 -s
+[100%]: build ok, spent 0.578s
+PS C:\Users\Administrator\workspace\optimize-class\ex2_1> xmake run
+ex2_1_s_for_only(1) = 0.999975, time = 1140ms
+ex2_1_s_half_expand(1) = 0.999975, time = 1082ms
+ex2_1_s_inline(1) = 0.999975, time = 1091ms
+ex2_1_s_vector(1) = 0.999975, time = 466ms
 ```

@@ -52,9 +52,20 @@ target("ex2_1")
 --    set_warnings("all", "error")
 --
 --    -- set language: c99, c++11
+   -- add_defines("EXPAND")
+   set_policy("build.warning", true)
    set_languages("c23", "c++23")
-   add_cxflags("-march=native")
+   -- add_cxflags("-march=native")
+   -- add_cxxflags("/Qpar")
+   -- add_cxxflags("/Qpar-report:2")
+   -- add_cxxflags("/Qvec-report:2")
+   -- add_cxxflags("/arch:SSE4")
+
    -- add_cxxflags("-funroll-loops")
+   -- add_cxxflags("-msse4.2")
+   add_cxxflags("-march=native")
+   add_cxxflags("-fopt-info-vec-missed")
+   add_cxxflags("-fopt-info-vec")
 --
 --    -- set optimization: none, faster, fastest, smallest
    set_optimize("fastest")
