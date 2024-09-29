@@ -69,6 +69,49 @@ inline __m256d fx_inline(size_t i)
     return _mm256_mul_pd(fx_vals, h_vec);
 }
 
+// inline __m256d fx_inline(size_t i)
+// {
+//     __m256d x_vec = _mm256_set_pd(
+//         (i+3), 
+//         (i+2), 
+//         (i+1), 
+//         i
+//     );
+//     x_vec = _mm256_mul_pd(x_vec, h_vec);
+//     __m256d x_vec_sqr = _mm256_mul_pd(x_vec, x_vec);
+//     return _mm256_mul_pd(
+//         _mm256_mul_pd(
+//             x_vec,
+//             _mm256_sub_pd(
+//                 one, 
+//                 _mm256_mul_pd(
+//                     _mm256_mul_pd(
+//                         x_vec_sqr, 
+//                         param1
+//                     ),
+//                     _mm256_sub_pd(
+//                         one, 
+//                         _mm256_mul_pd(
+//                             _mm256_mul_pd(
+//                                 x_vec_sqr, 
+//                                 param2
+//                             ),
+//                             _mm256_sub_pd(
+//                                 one, 
+//                                 _mm256_mul_pd(
+//                                     x_vec_sqr, 
+//                                     param3
+//                                 )
+//                             )
+//                         )
+//                     )
+//                 )
+//             )
+//         ), 
+//         h_vec
+//     );
+// }
+
 inline void ex2_1_s_vector() 
 {
     __m256d acc = _mm256_setzero_pd();
