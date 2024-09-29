@@ -51,7 +51,7 @@ target("Matrix_mul")
 --    set_warnings("all", "error")
 --
 --    -- set language: c99, c++11
---    set_languages("c99", "c++11")
+   set_languages("c17", "c++20")
 --
 --    -- set optimization: none, faster, fastest, smallest
 --    set_optimize("fastest")

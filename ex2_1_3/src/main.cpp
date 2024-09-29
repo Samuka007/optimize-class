@@ -69,48 +69,6 @@ inline __m256d fx_inline(size_t i)
     return _mm256_mul_pd(fx_vals, h_vec);
 }
 
-// inline __m256d fx_inline(size_t i)
-// {
-//     __m256d x_vec = _mm256_set_pd(
-//         (i+3), 
-//         (i+2), 
-//         (i+1), 
-//         i
-//     );
-//     x_vec = _mm256_mul_pd(x_vec, h_vec);
-//     __m256d x_vec_sqr = _mm256_mul_pd(x_vec, x_vec);
-//     return _mm256_mul_pd(
-//         _mm256_mul_pd(
-//             x_vec,
-//             _mm256_sub_pd(
-//                 one, 
-//                 _mm256_mul_pd(
-//                     _mm256_mul_pd(
-//                         x_vec_sqr, 
-//                         param1
-//                     ),
-//                     _mm256_sub_pd(
-//                         one, 
-//                         _mm256_mul_pd(
-//                             _mm256_mul_pd(
-//                                 x_vec_sqr, 
-//                                 param2
-//                             ),
-//                             _mm256_sub_pd(
-//                                 one, 
-//                                 _mm256_mul_pd(
-//                                     x_vec_sqr, 
-//                                     param3
-//                                 )
-//                             )
-//                         )
-//                     )
-//                 )
-//             )
-//         ), 
-//         h_vec
-//     );
-// }
 
 inline void ex2_1_s_vector() 
 {
@@ -130,15 +88,47 @@ inline void ex2_1_s_vector()
     for (int j = 0; j < 4; ++j) {
         vector_result += temp[j];
     }
+}
 
-    for (; i < N; ++i) {
-        vector_result += ex2_1_fx(i * h) * h;
+
+#include <array>
+#include <thread>
+template <std::size_t Piece>
+inline void ex2_1_s_vector_piece()
+{
+    static_assert(N%4==0 && N/4%Piece==0, "Can't divide the work evenly");
+    constexpr unsigned PieceN = N / Piece;
+    std::array<std::array<double, 4>, Piece> results;
+
+    std::array<std::thread, Piece> threads;
+
+    for (std::size_t i = 0; i < Piece; ++i) {
+        threads[i] = std::thread([&, i] {
+            __m256d acc = _mm256_setzero_pd();
+            for (unsigned j = i*PieceN; j < (i+1)*PieceN; j += 16) {
+                acc = _mm256_add_pd(acc, fx_inline(j));
+                acc = _mm256_add_pd(acc, fx_inline(j+4));
+                acc = _mm256_add_pd(acc, fx_inline(j+8));
+                acc = _mm256_add_pd(acc, fx_inline(j+12));
+            }
+            _mm256_storeu_pd(results[i].data(), acc);
+        });
+    }
+
+    for (std::size_t i = 0; i < Piece; ++i) {
+        threads[i].join();
+    }
+
+    for (std::size_t i = 0; i < Piece; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            vector_result += results[i][j];
+        }
     }
 }
 
 int main(int argc, char** argv) {
     auto start = std::chrono::high_resolution_clock::now();
-    ex2_1_s_vector();
+    ex2_1_s_vector_piece<10>();
     auto end = std::chrono::high_resolution_clock::now();
     auto time5 = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     std::cout << "ex2_1_s_vector(1) = " << vector_result << ", time = " << time5 << "ms" << std::endl;
