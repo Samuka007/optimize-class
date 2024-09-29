@@ -41,6 +41,7 @@ inline constexpr double ex2_1_fx(double x)
 double s1 = 0;
 void ex2_1_s_for_only()
 {
+    #pragma clang loop vectorize(enable)
     for (unsigned k1 = 0; k1 < N; ++k1)
     {
         s1 += ex2_1_fx(k1 * h) * h;
@@ -67,6 +68,7 @@ void ex2_1_s_for_only()
 double s3 = 0;
 void ex2_1_s_half_expand()
 {
+    #pragma clang loop vectorize(enable)
     for (unsigned k3 = 0; k3 < N; k3 += 4)
     {
         s3 += ex2_1_fx(k3 * h) * h;
@@ -85,24 +87,45 @@ double vector_result {0.0};
 void ex2_1_s_vector() {
     // Assumes N is a multiple of 4 for simplicity
     size_t i;
-    // double vector_result = 0.0;
 
     // Initialize an AVX2 register to accumulate results
     __m256d acc = _mm256_setzero_pd();
 
     // Process 4 elements per iteration using AVX2
-    for (i = 0; i < N; i += 4) {
+    for (i = 0; i < N; i += 8) {
         // Load 4 values of (k1 * h) into an AVX2 register
         __m256d k1_h = _mm256_set_pd(i* h, (i+1)* h, (i+2)* h, (i+3)* h);
 
         // Compute function values (ex2_1_fx) for 4 different k1 * h
-        __m256d fx_vals = _mm256_set_pd(ex2_1_fx((i+3) * h), ex2_1_fx((i+2) * h), ex2_1_fx((i+1) * h), ex2_1_fx(i * h));
+        __m256d fx_vals = _mm256_set_pd(
+            ex2_1_fx((i+3) * h), 
+            ex2_1_fx((i+2) * h), 
+            ex2_1_fx((i+1) * h), 
+            ex2_1_fx(i * h)
+        );
 
         // Multiply function values by h
         fx_vals = _mm256_mul_pd(fx_vals, _mm256_set1_pd(h));
 
         // Accumulate the results
         acc = _mm256_add_pd(acc, fx_vals);
+
+        // Load 4 values of (k1 * h) into an AVX2 register
+        __m256d k1_h2 = _mm256_set_pd((i+4)* h, (i+5)* h, (i+6)* h, (i+7)* h);
+
+        // Compute function values (ex2_1_fx) for 4 different k1 * h
+        __m256d fx_vals2 = _mm256_set_pd(
+            ex2_1_fx((i+7) * h), 
+            ex2_1_fx((i+6) * h), 
+            ex2_1_fx((i+5) * h), 
+            ex2_1_fx((i+4) * h)
+        );
+
+        // Multiply function values by h
+        fx_vals2 = _mm256_mul_pd(fx_vals2, _mm256_set1_pd(h));
+
+        // Accumulate the results
+        acc = _mm256_add_pd(acc, fx_vals2);
     }
 
     // Horizontal sum of the accumulated results
@@ -112,10 +135,10 @@ void ex2_1_s_vector() {
         vector_result += temp[j];
     }
 
-    // Handle remaining elements if N is not a multiple of 4
-    for (; i < N; ++i) {
-        vector_result += ex2_1_fx(i * h) * h;
-    }
+    // // Handle remaining elements if N is not a multiple of 4
+    // for (; i < N; ++i) {
+    //     vector_result += ex2_1_fx(i * h) * h;
+    // }
 }
 #endif
 
@@ -123,6 +146,7 @@ void ex2_1_s_vector() {
 double s4 = 0;
 void ex2_1_s_inline()
 {
+    #pragma clang loop vectorize(enable)
     for (unsigned k1 = 0; k1 < N; ++k1)
     {
         double pa1 = k1 * h;

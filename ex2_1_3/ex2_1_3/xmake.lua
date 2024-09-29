@@ -1,7 +1,6 @@
 add_rules("mode.debug", "mode.release")
-add_rules("plugin.compile_commands.autoupdate", {outputdir = ".vscode"})
 
-target("ex2_1")
+target("ex2_1_3")
     set_kind("binary")
     add_files("src/*.cpp")
 
@@ -43,7 +42,13 @@ target("ex2_1")
 --
 -- @code
 --    -- add debug and release modes
---    add_rules("mode.debug", "mode.release")
+    set_policy("build.warning", true)
+    set_languages("c23", "c++23")
+    add_cxxflags("-std=c++23")
+    add_cxxflags("-march=native")
+    add_cxxflags("-fopt-info-vec-missed")
+    add_cxxflags("-fopt-info-vec")
+    set_optimize("faster")
 --
 --    -- add macro definition
 --    add_defines("NDEBUG", "_GNU_SOURCE=1")
@@ -52,26 +57,10 @@ target("ex2_1")
 --    set_warnings("all", "error")
 --
 --    -- set language: c99, c++11
-   -- add_defines("EXPAND")
-   set_policy("build.warning", true)
-   set_languages("c23", "c++23")
-   -- add_cxflags("-march=native")
-   -- add_cxxflags("/Qpar")
-   -- add_cxxflags("/Qpar-report:2")
-   -- add_cxxflags("/Qvec-report:2")
-   -- add_cxxflags("/arch:SSE4")
-
-   -- add_cxxflags("-funroll-loops")
-   -- add_cxxflags("-msse4.2")
-   add_cxxflags("-march=native")
-   -- add_cxxflags("-fopt-info-vec-missed")
-   -- add_cxxflags("-fopt-info-vec")
-   add_cxxflags("-Rpass=loop-vectorize")
-   add_cxxflags("-Rpass-missed=loop-vectorize")
-   add_cxxflags("-Rpass-analysis=loop-vectorize")
+--    set_languages("c99", "c++11")
 --
 --    -- set optimization: none, faster, fastest, smallest
-   set_optimize("fastest")
+--    set_optimize("fastest")
 --
 --    -- add include search directories
 --    add_includedirs("/usr/include", "/usr/local/include")
