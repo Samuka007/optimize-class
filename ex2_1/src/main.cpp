@@ -32,10 +32,10 @@ inline constexpr double ex2_1_fx(double x)
     return x * (1 - x2 * par1 * (1 - x2 * par2 * (1 - x2 * par3)));
 }
 
-#define FOR_ONLY
-#define EXPAND
-#define T_INLINE
-#define VECTORIZE
+// #define FOR_ONLY
+// #define EXPAND
+// #define T_INLINE
+// #define VECTORIZE
 
 #ifdef FOR_ONLY
 double s1 = 0;
@@ -156,6 +156,39 @@ void ex2_1_s_inline()
 }
 #endif
 
+#define T_INLINE2
+#ifdef T_INLINE2
+#include <array>
+#include <thread>
+double s5 = 0;
+template <std::size_t Piece>
+void ex2_1_s_inline2()
+{
+    constexpr std::size_t PieceN = N / Piece;
+    std::array<double, Piece> s5s;
+    std::array<std::thread, Piece> threads;
+    for (std::size_t i = 0; i < Piece; ++i)
+    {
+        threads[i] = std::thread([i, &s5s](){
+            double s5s_i = 0;
+            #pragma clang loop vectorize(enable)
+            for (unsigned k1 = i * PieceN; k1 < (i + 1) * PieceN; ++k1)
+            {
+                double pa1 = k1 * h;
+                double pa12 = pa1 * pa1;
+                s5s_i += pa1 * (1 - pa12 * par1 * (1 - pa12 * par2 * (1 - pa12 * par3))) * h;
+            }
+            s5s[i] = s5s_i;
+        });
+    }
+    for (std::size_t i = 0; i < Piece; ++i)
+    {
+        threads[i].join();
+        s5 += s5s[i];
+    }
+}
+#endif
+
 int main(int argc, char** argv) {
     #ifdef FOR_ONLY
     auto time = timer_ms(ex2_1_s_for_only);
@@ -184,8 +217,9 @@ int main(int argc, char** argv) {
     std::cout << "ex2_1_s_vector(1) = " << vector_result << ", time = " << time5 << "ms" << std::endl;
     #endif
 
-    // auto start = std::chrono::high_resolution_clock::now();
-    // auto result5 = ex2_1_s_inline(1);
-    // auto end = std::chrono::high_resolution_clock::now();
-    // std::cout << "ex2_1_s_inline(1) = " << result5 << ", time = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+    #ifdef T_INLINE2
+    auto time6 = timer_ms(ex2_1_s_inline2<10>);
+    // std::print("ex2_1_s_inline2(1) = {}, time = {}ms\n", result6, time6);
+    std::cout << "ex2_1_s_inline2(1) = " << s5 << ", time = " << time6 << "ms" << std::endl;
+    #endif
 }
