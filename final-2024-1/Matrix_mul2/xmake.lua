@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-target("Matrix_mul")
+target("Matrix_mul2")
     set_kind("binary")
     add_files("src/*.cpp")
 
@@ -51,7 +51,7 @@ target("Matrix_mul")
 --    set_warnings("all", "error")
 --
 --    -- set language: c99, c++11
-   set_languages("c17", "c++23")
+   set_languages("c99", "c++20")
 --
 --    -- set optimization: none, faster, fastest, smallest
 --    set_optimize("fastest")
