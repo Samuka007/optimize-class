@@ -1,8 +1,29 @@
 add_rules("mode.debug", "mode.release")
 
+set_config("fast_io", true)
+-- add_defines("PARTIAL_MULT")
+add_defines("SIMD_MULT")
+set_languages("c99", "c++23")
+add_requires("eigen")
+
+if has_config("fast_io") then
+    add_defines("FAST_IO")
+    add_requires("fast_io")
+end
+
+
 target("Matrix_mul2")
     set_kind("binary")
     add_files("src/*.cpp")
+    add_packages("eigen")
+    add_cxxflags("-march=native")
+    if has_config("fast_io") then
+        add_packages("fast_io")
+    end
+    if is_mode("debug") then
+        add_defines("NDEBUG")
+    end
+    -- add_cxxflags("-fopt-info-vec-optimized")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io
@@ -51,7 +72,6 @@ target("Matrix_mul2")
 --    set_warnings("all", "error")
 --
 --    -- set language: c99, c++11
-   set_languages("c99", "c++20")
 --
 --    -- set optimization: none, faster, fastest, smallest
 --    set_optimize("fastest")
