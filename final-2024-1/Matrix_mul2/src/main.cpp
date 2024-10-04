@@ -43,6 +43,13 @@ void matrix_gen(float *a,float *b,int N,float seed){
 	}
 }
 
+void matrix_gen_test(float* a, float* b, int N) {
+    for (int i {0}; i < N * N; ++i) {
+        a[i] = i / 10.0f;
+        b[i] = i / 10.0f;
+    }
+}
+
 //基准矩阵乘法，a,b为输入矩阵的指针，c为输出矩阵的指针，N为矩阵的阶数
 void matrix_multiply(const float *a, const float *b, float *c, int N){
    int i,j,k;
@@ -85,7 +92,12 @@ auto get_arguments(int argc, char** argv) {
     // Matrix_mul N seed
     if (argc != 3) {
         #ifdef NDEBUG
-        return std::make_tuple(1024, 0.0355f);
+        return std::make_tuple(
+            512,
+            // 1024,
+            0.0355f
+            // 0.6f
+        );
         #else
         std::cerr << "Usage: " << argv[0] << " <matrix_size> <seed>" << std::endl;
         exit(EXIT_FAILURE);
@@ -119,44 +131,20 @@ namespace Matrix2D {
         return sum;
     }
 
-    // [1 * 8] * [8 * 8] = [1 * 8]
-    inline void batch_mul(const float* a, const float* b, float* result, int N) {
-        __m256 sum = _mm256_setzero_ps();
-        __m256 a_ = _mm256_load_ps(a);
-        for (int i = 0; i < 8; ++i) {
-            __m256 b_ = _mm256_load_ps(b + i * N);
-            // sum = _mm256_fmadd_ps(a_, b_, sum); // the old machine does not support fma
-            sum = _mm256_add_ps(sum, _mm256_mul_ps(a_, b_));
-        }
-        float temp[8];
-        _mm256_store_ps(temp, sum);
-        for (int i = 0; i < 8; ++i) {
-            result[i] += temp[i];
-        }
-    }
-
-
     inline void simd_mul(const float* lhs, const float* rhs, float* result, int N) {
         for (int i = 0; i < N; ++i) {
             for (int j = 0; j < N; j += 8) {
-                for (int k = 0; k < N; k += 8) {
-                    batch_mul(lhs + i * N + k, rhs + k * N + j, result + i * N + j, N);
+                for (int k = 0; k < N; ++k) {
+                    __m256 a = _mm256_set1_ps(lhs[i * N + k]);
+                    __m256 b = _mm256_load_ps(rhs + k * N + j);
+                    __m256 c = _mm256_load_ps(result + i * N + j);
+                    // c = _mm256_fmadd_ps(a, b, c); // the old machine does not support fma
+                    c = _mm256_add_ps(c, _mm256_mul_ps(a, b));
+                    _mm256_store_ps(result + i * N + j, c);
                 }
             }
         }
     }
-
-                    // __m256i indices = _mm256_set_epi32(
-                    //     (k + 7) * N + j,
-                    //     (k + 6) * N + j,
-                    //     (k + 5) * N + j,
-                    //     (k + 4) * N + j,
-                    //     (k + 3) * N + j,
-                    //     (k + 2) * N + j,
-                    //     (k + 1) * N + j,
-                    //     k * N + j
-                    // );
-                    // __m256 b = _mm256_i32gather_ps(rhs, indices, 4);
 
     class SquareMatrix {
     public:
@@ -223,15 +211,26 @@ namespace Matrix2D {
         float trace() const {
             return get_trace(data.data(), N);
         }
+
+        friend std::ostream& operator<<(std::ostream& os, const SquareMatrix& matrix) {
+            for (int i = 0; i < matrix.N; ++i) {
+                for (int j = 0; j < matrix.N; ++j) {
+                    os << matrix(i, j) << ' ';
+                }
+                os << '\n';
+            }
+            return os;
+        }
+        
     };
 
     auto get_pair_of_matrices(int N, float seed) {
         SquareMatrix a {N};
         SquareMatrix b {N};
         matrix_gen(a.data.data(), b.data.data(), N, seed);
+        // matrix_gen_test(a.data.data(), b.data.data(), N);
         return std::make_pair(a, b);
     }
-
 }
 
 
