@@ -1,8 +1,8 @@
 add_rules("mode.debug", "mode.release")
 
 set_config("fast_io", true)
--- add_defines("PARTIAL_MULT")
-add_defines("SIMD_MULT")
+add_defines("PARTIAL_MULT")
+-- add_defines("SIMD_MULT")
 set_languages("c99", "c++23")
 add_requires("eigen")
 

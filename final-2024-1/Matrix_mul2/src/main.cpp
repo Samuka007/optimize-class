@@ -95,6 +95,9 @@ auto get_arguments(int argc, char** argv) {
         return std::make_tuple(
             512,
             // 1024,
+            // 2048,
+            // 4096,
+            // 8192,
             0.0355f
             // 0.6f
         );
@@ -114,6 +117,7 @@ inline void invoke_and_show_result(std::invocable auto&& func) {
     #ifdef NDEBUG
     auto start = std::chrono::high_resolution_clock::now();
     auto result = func();
+    // func();
     auto end = std::chrono::high_resolution_clock::now();
     print("Result: ", result, "\n");
     print("Time: ", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(), "ms\n");
@@ -146,6 +150,39 @@ namespace Matrix2D {
         }
     }
 
+    inline void simd_with_block(const float* lhs, const float* rhs, float* result, int N) {
+        // 可以将矩阵分解为m×m的矩阵小块，每次完成一对小块的计算，以提高Cache的命中率。
+        const int small_block_size = 
+        // std::sqrt(
+        //     // cache_line_size // Time: 11701ms
+        //     l2_cache_size // Time: 6199ms
+        //     / (2 * sizeof(float))
+        // );
+        256;
+        
+        // print("small_block_size: ", small_block_size, "\n");
+
+        for (int i = 0; i < N; i += small_block_size) {
+            for (int j = 0; j < N; j += small_block_size) {
+                for (int k = 0; k < N; k += small_block_size) {
+
+                    for (int ii = i; ii < std::min(i + small_block_size, N); ++ii) {
+                        for (int jj = j; jj < std::min(j + small_block_size, N); jj+=8) {
+                            for (int kk = k; kk < std::min(k + small_block_size, N); ++kk) {
+                                __m256 a = _mm256_set1_ps(lhs[ii * N + kk]);
+                                __m256 b = _mm256_load_ps(rhs + kk * N + jj);
+                                __m256 c = _mm256_load_ps(result + ii * N + jj);
+                                c = _mm256_add_ps(c, _mm256_mul_ps(a, b));
+                                _mm256_store_ps(result + ii * N + jj, c);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
     class SquareMatrix {
     public:
         std::vector<float, Allocator32<float>> data;
@@ -172,7 +209,8 @@ namespace Matrix2D {
             SquareMatrix result {this->N};
             #ifdef MULTI_THREAD
             #elif defined(SIMD_MULT)
-            simd_mul(this->data.data(), other.data.data(), result.data.data(), this->N);
+            simd_with_block(this->data.data(), other.data.data(), result.data.data(), this->N);
+            // simd_mul(this->data.data(), other.data.data(), result.data.data(), this->N);
             #elif defined(PARTIAL_MULT) // 矩阵分块
 
             // 可以将矩阵分解为m×m的矩阵小块，每次完成一对小块的计算，以提高Cache的命中率。
@@ -250,7 +288,8 @@ int main(int argc, char** argv) {
         matrix_gen(a.data(), b.data(), N, seed);
         print("Eigen:\n");
         invoke_and_show_result([&] {
-            return (a * b).trace();
+            auto c = a * b;
+            return c.eval().trace();
         });
         #ifdef MULTI_THREAD
             print("\nMulti-threaded matrix multiplication\n");
