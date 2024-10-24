@@ -1,17 +1,22 @@
 #include <cmath>
+#include <cstdlib>
 #include <string>
 #include <tuple>
 #include <vector>
 #include "allocator.hpp"
 
-#ifdef NDEBUG
+#ifndef NDEBUG
 #include <cassert>
 #include <chrono>
 #include <Eigen/Dense>
 #endif
 
-#ifdef SIMD_MULT
+#if defined(SIMD_MULT) || defined(MULTI_THREAD)
 #include <immintrin.h>
+#endif
+
+#ifdef MULTI_THREAD
+#include <thread>
 #endif
 
 #ifdef FAST_IO
@@ -69,14 +74,14 @@ void matrix_multiply(const float *a, const float *b, float *c, int N){
     cache line (l1 cache) and l2 cache is per core
 */
 constexpr std::size_t cache_line_size = 
-    #ifdef __cpp_lib_hardware_interference_size
+    #ifdef L1_CACHE
+    L1_CACHE;
+    #elif defined (__cpp_lib_hardware_interference_size)
     #include <new>
     std::max(
         std::hardware_constructive_interference_size,
         std::hardware_destructive_interference_size
     );
-    #elif defined (L1_CACHE)
-    L1_CACHE;
     #else
     64 /* KB */ << 10; // x64 platform univesal l1 cache size
     #endif
@@ -91,10 +96,10 @@ constexpr std::size_t l2_cache_size =
 auto get_arguments(int argc, char** argv) {
     // Matrix_mul N seed
     if (argc != 3) {
-        #ifdef NDEBUG
+        #ifndef NDEBUG
         return std::make_tuple(
-            512,
-            // 1024,
+            // 512,
+            1024,
             // 2048,
             // 4096,
             // 8192,
@@ -114,7 +119,7 @@ auto get_arguments(int argc, char** argv) {
 }
 
 inline void invoke_and_show_result(std::invocable auto&& func) {
-    #ifdef NDEBUG
+    #ifndef NDEBUG
     auto start = std::chrono::high_resolution_clock::now();
     auto result = func();
     // func();
@@ -150,38 +155,89 @@ namespace Matrix2D {
         }
     }
 
-    inline void simd_with_block(const float* lhs, const float* rhs, float* result, int N) {
-        // 可以将矩阵分解为m×m的矩阵小块，每次完成一对小块的计算，以提高Cache的命中率。
-        const int small_block_size = 
-        // std::sqrt(
-        //     // cache_line_size // Time: 11701ms
-        //     l2_cache_size // Time: 6199ms
-        //     / (2 * sizeof(float))
-        // );
-        256;
-        
-        // print("small_block_size: ", small_block_size, "\n");
-
-        for (int i = 0; i < N; i += small_block_size) {
-            for (int j = 0; j < N; j += small_block_size) {
-                for (int k = 0; k < N; k += small_block_size) {
-
-                    for (int ii = i; ii < std::min(i + small_block_size, N); ++ii) {
-                        for (int jj = j; jj < std::min(j + small_block_size, N); jj+=8) {
-                            for (int kk = k; kk < std::min(k + small_block_size, N); ++kk) {
-                                __m256 a = _mm256_set1_ps(lhs[ii * N + kk]);
-                                __m256 b = _mm256_load_ps(rhs + kk * N + jj);
-                                __m256 c = _mm256_load_ps(result + ii * N + jj);
-                                c = _mm256_add_ps(c, _mm256_mul_ps(a, b));
-                                _mm256_store_ps(result + ii * N + jj, c);
-                            }
+    inline void simd_with_block(const float* lhs, const float* rhs, float* result, int N, int kernel) {
+        // attention: kernel should line up with 32 bytes
+        if (kernel % (32 / sizeof(float)) != 0) {
+            kernel = (kernel / (32 / sizeof(float)) + 1) * (32 / sizeof(float));
+        }
+        for (int i = 0; i < N; i += kernel) {
+            for (int j = 0; j < N; j += kernel) {
+                for (int ii = i; ii < std::min(i + kernel, N); ++ii) {
+                    for (int jj = j; jj < std::min(j + kernel, N); jj += 8) {
+                        for (int k = 0; k < N; ++k) {
+                            __m256 a = _mm256_set1_ps(lhs[ii * N + k]);
+                            __m256 b = _mm256_load_ps(rhs + k * N + jj);
+                            __m256 c = _mm256_load_ps(result + ii * N + jj);
+                            c = _mm256_add_ps(c, _mm256_mul_ps(a, b));
+                            _mm256_store_ps(result + ii * N + jj, c);
                         }
                     }
-
                 }
             }
         }
     }
+
+    inline void block_multiply(const float* lhs, const float* rhs, float* result, int N, int kernel) {
+        for (int i{0}; i < N; i += kernel) {
+            for (int j{0}; j < N; j += kernel) {
+                for (int ii{i}; ii < std::min(i + kernel, N); ++ii) {
+                    for (int jj{j}; jj < std::min(j + kernel, N); ++jj) {
+                        for (int k{0}; k < N; ++k) {
+                            result[ii * N + jj] += lhs[ii * N + k] * rhs[k * N + jj];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #ifdef MULTI_THREAD // multi-threaded with simd
+    const int thread_number = std::thread::hardware_concurrency();
+    constexpr int float_number = l2_cache_size / sizeof(float);
+    inline void multi_thread(const float* lhs, const float* rhs, float* result, int N) {
+        int kernel = std::sqrt(float_number + N * N) - N;
+        if (kernel % (32 / sizeof(float)) != 0) {
+            kernel = (kernel / (32 / sizeof(float)) + 1) * (32 / sizeof(float));
+            #ifndef NDEBUG
+            print("kernel: ", kernel, "\n");
+            #endif
+        }
+        if (kernel * thread_number > N) {
+            #ifndef NDEBUG
+            print("Kernel size is too large\n");
+            #endif
+            exit(EXIT_FAILURE);
+        }
+        int row_size = N / thread_number;
+        if (row_size % kernel != 0) {
+            row_size = (row_size / kernel + 1) * kernel;
+        }
+        // split the matrix into rows to accelerate
+        std::vector<std::thread> thread_list;
+        for (int t = 0; t < thread_number; ++t) {
+            thread_list.emplace_back([=, &lhs, &rhs, &result] {
+                for (int i = t * row_size; i < std::min((t + 1) * row_size, N); i += kernel) {
+                    for (int j = 0; j < N; j += kernel) {
+                        for (int ii = i; ii < std::min(i + kernel, N); ++ii) {
+                            for (int jj = j; jj < std::min(j + kernel, N); jj += 8) {
+                                for (int k = 0; k < N; ++k) {
+                                    __m256 a = _mm256_set1_ps(lhs[ii * N + k]);
+                                    __m256 b = _mm256_load_ps(rhs + k * N + jj);
+                                    __m256 c = _mm256_load_ps(result + ii * N + jj);
+                                    c = _mm256_add_ps(c, _mm256_mul_ps(a, b));
+                                    _mm256_store_ps(result + ii * N + jj, c);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        for (auto& thread : thread_list) {
+            thread.join();
+        }
+    }
+    #endif
 
     class SquareMatrix {
     public:
@@ -202,42 +258,24 @@ namespace Matrix2D {
         }
 
         SquareMatrix operator*(const SquareMatrix& other) const {
-            #ifdef NDEBUG
+
+            constexpr int float_number = l2_cache_size / sizeof(float);
+            const int kernel = std::sqrt(float_number + N*N) - N;
+
+            #ifndef NDEBUG
+            print("small_block_size: ", kernel, "\n");
             assert(this->N == other.N);
             #endif
 
             SquareMatrix result {this->N};
+
             #ifdef MULTI_THREAD
+            multi_thread(this->data.data(), other.data.data(), result.data.data(), this->N);
             #elif defined(SIMD_MULT)
-            simd_with_block(this->data.data(), other.data.data(), result.data.data(), this->N);
+            simd_with_block(this->data.data(), other.data.data(), result.data.data(), this->N, kernel);
             // simd_mul(this->data.data(), other.data.data(), result.data.data(), this->N);
             #elif defined(PARTIAL_MULT) // 矩阵分块
-
-            // 可以将矩阵分解为m×m的矩阵小块，每次完成一对小块的计算，以提高Cache的命中率。
-            // n * n * 2 * sizeof(float) = l2_cache_size, where small_block_size = n
-            const int small_block_size = std::sqrt(
-                // cache_line_size // Time: 11701ms
-                l2_cache_size // Time: 6199ms
-                / (2 * sizeof(float)));
-
-            print("small_block_size: ", small_block_size, "\n");
-
-            for (int i = 0; i < N; i += small_block_size) {
-                for (int j = 0; j < N; j += small_block_size) {
-                    for (int k = 0; k < N; k += small_block_size) {
-                        for (int ii = i; ii < std::min(i + small_block_size, N); ++ii) {
-                            for (int jj = j; jj < std::min(j + small_block_size, N); ++jj) {
-                                float sum = 0.0;
-                                for (int kk = k; kk < std::min(k + small_block_size, N); ++kk) {
-                                    sum += this->data[ii * N + kk] * other.data[kk * N + jj];
-                                }
-                                result.data[ii * N + jj] += sum;
-                            }
-                        }
-                    }
-                }
-            }
-
+            block_multiply(this->data.data(), other.data.data(), result.data.data(), this->N, kernel);
             #else
             // 基准矩阵乘法：Time: 3398ms
             matrix_multiply(this->data.data(), other.data.data(), result.data.data(), this->N);
@@ -281,12 +319,13 @@ int main(int argc, char** argv) {
     std::ios_base::sync_with_stdio(false);
     #endif
 
-    #ifdef NDEBUG
+    #ifndef NDEBUG
         // validate using Eigen
+        Eigen::initParallel();
         Eigen::MatrixXf a {N, N};
         Eigen::MatrixXf b {N, N};
         matrix_gen(a.data(), b.data(), N, seed);
-        print("Eigen:\n");
+        print("Eigen using thread: ", Eigen::nbThreads(), "\n");
         invoke_and_show_result([&] {
             auto c = a * b;
             return c.eval().trace();

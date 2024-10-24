@@ -1,28 +1,44 @@
 add_rules("mode.debug", "mode.release")
 
 set_config("fast_io", true)
-add_defines("PARTIAL_MULT")
+-- add_defines("PARTIAL_MULT")
 -- add_defines("SIMD_MULT")
+add_defines("MULTI_THREAD")
 set_languages("c99", "c++23")
-add_requires("eigen")
+-- add_requires("eigen")
 
 if has_config("fast_io") then
     add_defines("FAST_IO")
     add_requires("fast_io")
 end
 
-
 target("Matrix_mul2")
     set_kind("binary")
     add_files("src/*.cpp")
-    add_packages("eigen")
     add_cxxflags("-march=native")
     if has_config("fast_io") then
         add_packages("fast_io")
     end
     if is_mode("debug") then
-        add_defines("NDEBUG")
+        add_packages("eigen")
+        set_optimize("faster")
+        -- add_ldflags("-fopenmp")  -- Add this line to link OpenMP library
+        -- add_cxxflags("-fopenmp")
+        else 
+        set_optimize("none")
     end
+
+    on_run(function (target)
+        os.execv(target:targetfile(), {"1024", "0.0355"})
+        -- Release:
+        -- 252384.53
+        -- 252384.53
+        -- 252384.53
+        -- 252384.53
+        -- Debug:
+        -- Baseline: 252384.55 (O0)
+        -- Baseline: 252384.53 (O2)
+    end)
     -- add_cxxflags("-fopt-info-vec-optimized")
 
 --

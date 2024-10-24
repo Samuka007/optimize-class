@@ -2,8 +2,10 @@
 
 #include <iostream>
 #include <memory>
+#include <limits>
 #include <cstddef>
 #include <stdexcept>
+#include <cstdint>
 #include <immintrin.h> // For _mm_malloc and _mm_free
 
 template <typename T>
