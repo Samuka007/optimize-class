@@ -366,7 +366,7 @@ int main(int argc, char** argv) {
             print("\nBaseline matrix multiplication\n");
         #endif
     #endif
-
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     invoke_and_show_result([&] {
         return (a2 * b2).trace();
     });
