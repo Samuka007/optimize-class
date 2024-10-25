@@ -104,7 +104,7 @@ target("Matrix_mul2")
 --
 --    -- add compilation and link flags
 --    add_cxflags("-stdnolib", "-fno-strict-aliasing")
---    add_ldflags("-L/usr/local/lib", "-lpthread", {force = true})
+   add_ldflags("-L/usr/local/lib", "-lpthread", {force = true})
 --
 -- @endcode
 --
