@@ -5,6 +5,7 @@ add_rules("mode.debug", "mode.release")
 -- add_defines("SIMD_MULT")
 add_defines("MULTI_THREAD")
 set_languages("c99", "c++11")
+add_requires("pthread")
 -- add_requires("eigen")
 
 -- if has_config("fast_io") then
@@ -15,7 +16,8 @@ set_languages("c99", "c++11")
 target("Matrix_mul2")
     set_kind("binary")
     add_files("src/*.cpp")
-    add_cxxflags("-march=native", "-pthread")
+    add_cxxflags("-march=native", "-Wl,--no-as-needed", "-pthread")
+    add_links("pthread")
     -- if has_config("fast_io") then
     --     add_packages("fast_io")
     -- end
@@ -104,7 +106,7 @@ target("Matrix_mul2")
 --
 --    -- add compilation and link flags
 --    add_cxflags("-stdnolib", "-fno-strict-aliasing")
-   add_ldflags("-L/usr/local/lib", "-lpthread", {force = true})
+--    add_ldflags("-L/usr/local/lib", "-lpthread", {force = true})
 --
 -- @endcode
 --
