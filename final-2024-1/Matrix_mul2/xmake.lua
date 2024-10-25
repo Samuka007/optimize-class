@@ -13,7 +13,7 @@ add_requires("pthread")
 --     add_requires("fast_io")
 -- end
 
-target("Matrix_mul2")
+target("Matrix_mul")
     set_kind("binary")
     add_files("src/*.cpp")
     add_cxxflags("-march=native", "-Wl,--no-as-needed", "-pthread")
