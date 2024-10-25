@@ -15,7 +15,7 @@ set_languages("c99", "c++11")
 target("Matrix_mul2")
     set_kind("binary")
     add_files("src/*.cpp")
-    add_cxxflags("-march=native")
+    add_cxxflags("-march=native", "-pthread")
     -- if has_config("fast_io") then
     --     add_packages("fast_io")
     -- end
