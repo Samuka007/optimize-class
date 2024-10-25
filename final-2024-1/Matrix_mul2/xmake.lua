@@ -19,9 +19,9 @@ target("Matrix_mul2")
     -- if has_config("fast_io") then
     --     add_packages("fast_io")
     -- end
+    set_optimize("faster")
     if is_mode("debug") then
         add_packages("eigen")
-        set_optimize("faster")
         -- add_ldflags("-fopenmp")  -- Add this line to link OpenMP library
         -- add_cxxflags("-fopenmp")
         else 
