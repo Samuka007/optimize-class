@@ -108,7 +108,7 @@ std::tuple<int, float> get_arguments(int argc, char** argv) {
             // 0.6f
         );
         #else
-        std::cerr << "Usage: " << argv[0] << " <matrix_size> <seed>" << std::endl;
+        // std::cerr << "Usage: " << argv[0] << " <matrix_size> <seed>" << std::endl;
         exit(EXIT_FAILURE);
         #endif
     }
@@ -304,15 +304,15 @@ namespace Matrix2D {
             return get_trace(data.data(), N);
         }
 
-        friend std::ostream& operator<<(std::ostream& os, const SquareMatrix& matrix) {
-            for (int i = 0; i < matrix.N; ++i) {
-                for (int j = 0; j < matrix.N; ++j) {
-                    os << matrix(i, j) << ' ';
-                }
-                os << '\n';
-            }
-            return os;
-        }
+        // friend std::ostream& operator<<(std::ostream& os, const SquareMatrix& matrix) {
+        //     for (int i = 0; i < matrix.N; ++i) {
+        //         for (int j = 0; j < matrix.N; ++j) {
+        //             os << matrix(i, j) << ' ';
+        //         }
+        //         os << '\n';
+        //     }
+        //     return os;
+        // }
         
     };
 
