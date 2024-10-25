@@ -1,24 +1,24 @@
 add_rules("mode.debug", "mode.release")
 
-set_config("fast_io", true)
+-- set_config("fast_io", true)
 -- add_defines("PARTIAL_MULT")
 -- add_defines("SIMD_MULT")
 add_defines("MULTI_THREAD")
-set_languages("c99", "c++23")
+set_languages("c99", "c++11")
 -- add_requires("eigen")
 
-if has_config("fast_io") then
-    add_defines("FAST_IO")
-    add_requires("fast_io")
-end
+-- if has_config("fast_io") then
+--     add_defines("FAST_IO")
+--     add_requires("fast_io")
+-- end
 
 target("Matrix_mul2")
     set_kind("binary")
     add_files("src/*.cpp")
     add_cxxflags("-march=native")
-    if has_config("fast_io") then
-        add_packages("fast_io")
-    end
+    -- if has_config("fast_io") then
+    --     add_packages("fast_io")
+    -- end
     if is_mode("debug") then
         add_packages("eigen")
         set_optimize("faster")

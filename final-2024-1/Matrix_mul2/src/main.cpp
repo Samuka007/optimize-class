@@ -24,10 +24,11 @@
 using fast_io::io::print;
 #else
 
-#include <iostream>
-void print(auto&&... args) {
-    (std::cout << ... << args);
-}
+// #include <iostream>
+// void print(auto&&... args) {
+//     (std::cout << ... << args);
+// }
+#include <cstdio>
 
 #endif
 
@@ -93,7 +94,7 @@ constexpr std::size_t l2_cache_size =
     256 /* KB */ << 10; // l2 cache on e5-2666v3
     #endif
 
-auto get_arguments(int argc, char** argv) {
+std::tuple<int, float> get_arguments(int argc, char** argv) {
     // Matrix_mul N seed
     if (argc != 3) {
         #ifndef NDEBUG
@@ -118,6 +119,7 @@ auto get_arguments(int argc, char** argv) {
     return std::make_tuple(N, seed);
 }
 
+#if __cplusplus >= 202002L
 inline void invoke_and_show_result(std::invocable auto&& func) {
     #ifndef NDEBUG
     auto start = std::chrono::high_resolution_clock::now();
@@ -130,6 +132,20 @@ inline void invoke_and_show_result(std::invocable auto&& func) {
     print(func());
     #endif
 }
+#else
+template<typename Func>
+inline void invoke_and_show_result(Func func) {
+    // #ifndef NDEBUG
+    // auto start = std::chrono::high_resolution_clock::now();
+    // auto result = func();
+    // auto end = std::chrono::high_resolution_clock::now();
+    // std::printf("Result: %f\n", result);
+    // std::printf("Time: %ldms\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+    // #else
+    std::printf("%f", func());
+    // #endif
+}
+#endif
 
 namespace Matrix2D {
     float get_trace(const float* matrix, int N) {
@@ -300,7 +316,7 @@ namespace Matrix2D {
         
     };
 
-    auto get_pair_of_matrices(int N, float seed) {
+    std::pair<SquareMatrix, SquareMatrix> get_pair_of_matrices(int N, float seed) {
         SquareMatrix a {N};
         SquareMatrix b {N};
         matrix_gen(a.data.data(), b.data.data(), N, seed);
@@ -311,13 +327,23 @@ namespace Matrix2D {
 
 
 int main(int argc, char** argv) {
+    #if __cplusplus > 201703L
     auto [N, seed] = get_arguments(argc, argv);
 
     auto [a2, b2] = Matrix2D::get_pair_of_matrices(N, seed);
+    #else
+    int N;
+    float seed;
+    std::tie(N, seed) = get_arguments(argc, argv);
 
-    #ifndef FAST_IO
-    std::ios_base::sync_with_stdio(false);
+    auto pair = Matrix2D::get_pair_of_matrices(N, seed);
+    auto& a2 = pair.first;
+    auto& b2 = pair.second;
     #endif
+
+    // #ifndef FAST_IO
+    // std::ios_base::sync_with_stdio(false);
+    // #endif
 
     #ifndef NDEBUG
         // validate using Eigen
